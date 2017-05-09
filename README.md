@@ -1,6 +1,6 @@
 # Pycall : C API for python functions #
 
-Pycall is an open-source C API for python functions that provides an easily way to call python functions directly in C/C++.
+Pycall is an open-source C API for python functions that provides an easy way to call python functions directly in C/C++.
 
 ## Get Started with Pycall ##
 

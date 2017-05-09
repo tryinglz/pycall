@@ -1,8 +1,5 @@
 export CPY_INCLUDE=$(shell python3-config --cflags)
-export CPY_LINKER=$(shell python3-config --ldflags)
-
 export CFLAGS+=$(CPY_INCLUDE)
-export LDFLAGS+=$(CPY_LINKER)
 
 export CC=clang
 

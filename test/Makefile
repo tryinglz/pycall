@@ -3,10 +3,10 @@ all: test
 CFLAGS+=-I../include
 
 test_build: ../src/pycall.o test.o
-	clang ../src/pycall.o test.o $(LDFLAGS) -o test
+	clang ../src/pycall.o test.o $(LDFLAGS) -o test1
 
 test: test_build
-	PYTHONPATH=. ./test
+	PYTHONPATH=. ./test1
 
 clean:
 	-find . -name *.o | xargs rm

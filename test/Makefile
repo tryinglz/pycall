@@ -1,7 +1,5 @@
 all: test
 
-CFLAGS+=-I../include
-
 CPY_LINKER=$(shell python3-config --ldflags)
 LDFLAGS+=$(CPY_LINKER)
 

@@ -1,6 +1,8 @@
 export CPY_INCLUDE=$(shell python3-config --cflags)
 export CFLAGS+=$(CPY_INCLUDE)
 
+CFLAGS+=-I../include
+
 export CC=clang
 
 all:

@@ -11,6 +11,6 @@ test: test_build
 clean:
 	-find . -name *.o | xargs rm
 	-rm -rf __pycache__
-	-rm test
+	-rm test1
 
 .PHONY: test

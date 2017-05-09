@@ -5,7 +5,7 @@
 //| Copyright (c) 2017 Liang ZOU and contributors                            |
 //| See the full list at https://github.com/liangdzou/pycall/contributors    |
 //|--------------------------------------------------------------------------|
-//| pycall.c -- implementation the APIs in pycall.h                           |
+//| pycall.c -- implementation the APIs in pycall.h                          |
 //|                                                                          |
 //| Author:   Liang, ZOU                                                     |
 //|                                                                          |

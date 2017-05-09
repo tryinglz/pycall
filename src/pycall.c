@@ -1,51 +1,110 @@
+//+--------------------------------------------------------------------------+
+//| This file is subject to the terms and conditions defined in file         |
+//| 'LICENSE.txt', which is part of this source code package.                |
+//|--------------------------------------------------------------------------|
+//| Copyright (c) 2017 Liang ZOU and contributors                            |
+//| See the full list at https://github.com/liangdzou/pycall/contributors    |
+//|--------------------------------------------------------------------------|
+//| pycall.c -- implementation the APIs in pycall.h                           |
+//|                                                                          |
+//| Author:   Liang, ZOU                                                     |
+//|                                                                          |
+//| Purpose:  Implement the APIs in pycall.h                                 |
+//+--------------------------------------------------------------------------+
+
 #include <Python.h>
+#include <stdarg.h>
+#include <string.h>
 
-int pycall(char *py_file, char *py_func, char *text) {
-    PyObject *pName, *pModule, *pFunc;
-    PyObject *pArgs, *pValue;
+#include "logger.h"
 
+PyObject * pycall(const char * p_module, const char * p_func,
+                  const char * format, ...) {
     Py_Initialize();
-    pName = PyUnicode_FromString(py_file);
-    pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
 
-    int is_match = -1;
-    if (pModule != NULL) {
-        pFunc = PyObject_GetAttrString(pModule, py_func);
+    // temp variables
+    size_t i;
+    long l;
+    double d;
+    char * str;
+    PyObject * py_value;
 
-        if (pFunc && PyCallable_Check(pFunc)) {
-            pArgs = PyTuple_New(1);
-            pValue = PyUnicode_FromString(text);
-            if (!pValue) {
-                Py_DECREF(pArgs);
-                Py_DECREF(pModule);
-                fprintf(stderr, "Cannot convert argument\n");
-                return -1;
-            }
-            PyTuple_SetItem(pArgs, 0, pValue);
-            pValue = PyObject_CallObject(pFunc, pArgs);
-            Py_DECREF(pArgs);
-            if (pValue != NULL) {
-                is_match = PyLong_AsLong(pValue);
-                fprintf(stderr, "Result of call: %d\n", is_match);
-                Py_DECREF(pValue);
-            } else {
-                Py_DECREF(pFunc);
-                Py_DECREF(pModule);
-                PyErr_Print();
-                fprintf(stderr,"Call failed\n");
-                return -1;
-            }
-        } else {
-            if (PyErr_Occurred())
-                PyErr_Print();
-            fprintf(stderr, "Cannot find function \"%s\"\n", py_func);
-        }
-    } else {
+    // get the module
+    PyObject * py_name = PyUnicode_FromString(p_module);
+    PyObject * py_module = PyImport_Import(py_name);
+    Py_DECREF(py_name);
+    if (py_module == NULL) {
+        // report error
         PyErr_Print();
-        fprintf(stderr, "Failed to load \"%s\"\n", py_file);
-        return -1;
+        ERROR("failed to load \"%s\"!", p_module);
+        return NULL;
     }
+
+    // get the function
+    PyObject * py_func = PyObject_GetAttrString(py_module, p_func);
+    if (!py_func || !PyCallable_Check(py_func)) {
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+        }
+        // release resources
+        Py_DECREF(py_module);
+        Py_XDECREF(py_func);
+        // report error
+        ERROR("cannot find function \"%s\"!", p_func);
+        return NULL;
+    }
+
+    // parse the arguments
+    size_t args_num = strlen(format);
+    va_list args;
+    va_start(args, format);
+    PyObject * py_args = PyTuple_New(args_num);
+    for (i = 0; i < args_num; ++i) {
+        // currently, only int, double, char, and string are supported
+        // TODO: support more types
+        switch (format[i]) {
+            case 'i':
+                l = (long)va_arg(args, int);
+                py_value = PyLong_FromLong(l);
+                break;
+            case 'l':
+                l = va_arg(args, long);
+                py_value = PyLong_FromLong(l);
+                break;
+            case 'd':
+                d = va_arg(args, double);
+                py_value = PyFloat_FromDouble(d);
+                break;
+            case 's':
+                str = va_arg(args, char *);
+                py_value = PyUnicode_FromString(str);
+                break;
+            default:
+                ERROR("unsupported type (%zu, %c) exists in format!", i, format[i]);
+        }
+        if (!py_value) {
+            // release resources
+            Py_DECREF(py_module);
+            Py_DECREF(py_func);
+            Py_DECREF(py_args);
+            va_end(args);
+            // report error
+            PyErr_Print();
+            ERROR("the %zu-th parameter error!", i);
+            return NULL;
+        }
+        PyTuple_SetItem(py_args, i, py_value);
+    }
+    va_end(args);
+
+    // call the function
+    py_value = PyObject_CallObject(py_func, py_args);
+
+    // release resources
+    Py_DECREF(py_module);
+    Py_DECREF(py_func);
+    Py_DECREF(py_args);
     Py_Finalize();
-    return is_match;
+
+    return py_value;
 }

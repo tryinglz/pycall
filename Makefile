@@ -13,6 +13,7 @@ all:
 	+$(MAKE) -C src CFLAGS="$(CFLAGS)"
 
 test:
+	+$(MAKE) -C src CFLAGS="$(CFLAGS)"
 	+$(MAKE) -C test test CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 
 clean:

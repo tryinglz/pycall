@@ -1,4 +1,5 @@
 *__pycache__
 *.o
 
+src/libpycall.a
 test/test1

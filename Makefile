@@ -1,15 +1,19 @@
-export CPY_INCLUDE=$(shell python3-config --cflags)
-export CFLAGS+=$(CPY_INCLUDE)
+PYTHON_CONF=python3-config
 
+CPY_INCLUDE=$(shell $(PYTHON_CONF) --cflags)
+CFLAGS+=$(CPY_INCLUDE)
 CFLAGS+=-I../include
+
+CPY_LINKER=$(shell $(PYTHON_CONF) --ldflags)
+LDFLAGS+=$(CPY_LINKER)
 
 export CC=clang
 
 all:
-	+$(MAKE) -C src
+	+$(MAKE) -C src CFLAGS="$(CFLAGS)"
 
 test:
-	+$(MAKE) -C test test
+	+$(MAKE) -C test test CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 
 clean:
 	+$(MAKE) -C src clean

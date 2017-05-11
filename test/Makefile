@@ -1,8 +1,5 @@
 all: test
 
-CPY_LINKER=$(shell python3-config --ldflags)
-LDFLAGS+=$(CPY_LINKER)
-
 test_build: ../src/pycall.o test.o
 	clang ../src/pycall.o test.o $(LDFLAGS) -o test1
 
